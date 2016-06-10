@@ -1,0 +1,3 @@
+simplon_activite_gite_homepage:
+    path:     /
+    defaults: { _controller: SimplonActiviteGiteBundle:Default:index }

@@ -1,0 +1,4 @@
+services:
+#    simplon_activite_gite.example:
+#        class: Simplon\ActiviteGiteBundle\Example
+#        arguments: ["@service_id", "plain_value", %parameter%]
