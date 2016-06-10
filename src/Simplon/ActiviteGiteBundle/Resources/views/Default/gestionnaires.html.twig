@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+{# Afficher les balises du formulaire #}
+{{ form_start(gestionnaireForm) }}
+{{ form_widget(gestionnaireForm) }}
+<input type="submit" value="Envoyer">
+{{ form_end(gestionnaireForm) }}
+
+{% endblock %}

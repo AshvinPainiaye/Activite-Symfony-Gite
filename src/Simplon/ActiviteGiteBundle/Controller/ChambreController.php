@@ -9,44 +9,49 @@ use Simplon\ActiviteGiteBundle\Entity\Gestionnaire;
 use Simplon\ActiviteGiteBundle\Entity\Gite;
 use Simplon\ActiviteGiteBundle\Entity\Reservation;
 use Simplon\ActiviteGiteBundle\Entity\Chambres;
+use Symfony\Component\HttpFoundation\Request;
+use Simplon\ActiviteGiteBundle\Form\ChambresType;
 
 
 class ChambreController extends Controller
 {
   /**
-   * @route("/chambre/{giteId}/{clientId}")
+   * @route("/chambre/{gitesId}/{clientId}")
    */
-  public function createAction($giteId, $clientId)
-  {
 
-    $gites = $this->getDoctrine()
-    ->getRepository('SimplonActiviteGiteBundle:Gites')
-    ->find($giteId);
-
-    $client = $this->getDoctrine()
-    ->getRepository('SimplonActiviteGiteBundle:Client')
-    ->find($clientId);
-
-     $chambres = $this->creerChambre('2', 'Disponible', '400 euros', $gites, $client);
-
-     $em = $this->getDoctrine()->getManager();
-     $em->persist($chambres);
-     $em->flush();
-
-      return $this->render('SimplonActiviteGiteBundle:Default:index.html.twig');
-  }
-
-  protected function creerChambre($nombrePlace, $disponible, $prix, $gites, $client)
+   public function insertAction($gitesId, $clientId, Request $request)
    {
-       $chambres = new Chambres();
-       $chambres->setNombrePlace($nombrePlace)
-              ->setDisponible($disponible)
-              ->setPrix($prix)
-              ->setGites($gites)
-              ->setClient($client)
-     ;
+     $gites = $this->getDoctrine()
+     ->getRepository('SimplonActiviteGiteBundle:Gites')
+     ->find($gitesId);
 
-       return $chambres;
+     $client = $this->getDoctrine()
+     ->getRepository('SimplonActiviteGiteBundle:Client')
+     ->find($clientId);
+
+     //l'entité Chambres
+     $chambres = new Chambres();
+
+     $chambres->setGites($gites);
+     $chambres->setClient($client);
+
+     //créer le formulaire à partir ChambresType et fait un lien avec l'entité Chambres
+     $chambresForm = $this->createForm(ChambresType::class,$chambres);
+
+     //Récupère les données soumises par le formulaire et l'insère dans l'entité Chambres
+     $chambresForm->handleRequest($request);
+
+     //Enregistrer le formulaire uniquement quand celui-ci a été soumis et qu'il est valide
+     if ($chambresForm->isSubmitted() && $chambresForm->isValid()) {
+
+       $em = $this->getDoctrine()->getManager();
+       $em->persist($chambres);
+       $em->flush();
+     }
+
+     return $this->render('SimplonActiviteGiteBundle:Default:chambres.html.twig', array(
+       //transforme le formulaire pour être générable par Twig dans la vue
+       'chambresForm'=>$chambresForm->createView()
+     ));
    }
-
 }

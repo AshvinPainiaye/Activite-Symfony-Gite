@@ -9,9 +9,8 @@ use Simplon\ActiviteGiteBundle\Entity\Gestionnaire;
 use Simplon\ActiviteGiteBundle\Entity\Chambres;
 use Simplon\ActiviteGiteBundle\Entity\Reservation;
 use Simplon\ActiviteGiteBundle\Entity\Gites;
-
-
-
+use Symfony\Component\HttpFoundation\Request;
+use Simplon\ActiviteGiteBundle\Form\GitesType;
 
 class GiteController extends Controller
 {
@@ -19,27 +18,27 @@ class GiteController extends Controller
    * @route("/gite")
    */
 
-  public function createAction()
-  {
-    $gite = $this->creerGite('PAINIAYE', '15 rue saphirs St gille', '0262123456', 'gite@painiaye.com');
-
-    $em = $this->getDoctrine()->getManager();
-    $em->persist($gite);
-    $em->flush();
-      return $this->render('SimplonActiviteGiteBundle:Default:index.html.twig');
-  }
-
-
-  protected function creerGite($nom, $adresse, $tel, $email)
+   public function insertAction(Request $request)
    {
-       $gite = new Gites();
-       $gite->setNom($nom)
-              ->setAdresse($adresse)
-              ->setTel($tel)
-              ->setEmail($email)
-     ;
+     //l'entité Gite
+     $gites = new Gites();
 
-       return $gite;
+     //créer le formulaire à partir GiteType et fait un lien avec l'entité Gite
+     $gitesForm = $this->createForm(GitesType::class,$gites);
+
+     //Récupère les données soumises par le formulaire et l'insère dans l'entité Gite
+     $gitesForm->handleRequest($request);
+
+     //Enregistrer le formulaire uniquement quand celui-ci a été soumis et qu'il est valide
+     if ($gitesForm->isSubmitted() && $gitesForm->isValid()) {
+       $em = $this->getDoctrine()->getManager();
+       $em->persist($gites);
+       $em->flush();
+     }
+
+     return $this->render('SimplonActiviteGiteBundle:Default:gites.html.twig', array(
+       //transforme le formulaire pour être générable par Twig dans la vue
+       'gitesForm'=>$gitesForm->createView()
+     ));
    }
-
 }
